@@ -891,6 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
   runPreloader();
   // Check backend status
   checkBackendStatus();
+  // Setup reply form submit listener
+  setupReplyForm();
 });
 
 // ============================================
@@ -1068,4 +1070,55 @@ function getSessionId() {
     sessionStorage.setItem('visitor_session', id);
   }
   return id;
+}
+
+function setupReplyForm() {
+  const form = document.getElementById('reply-form');
+  const statusEl = document.getElementById('reply-status');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reply-name').value;
+    const message = document.getElementById('reply-message').value;
+
+    statusEl.textContent = '⏳ Sending with love...';
+    statusEl.className = 'text-xs text-yellow-400 text-center mt-3';
+    statusEl.classList.remove('hidden');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/email/send-message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fromName: name,
+          message: message,
+          subject: `❤️ Birthday Reply from ${name}`
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        statusEl.textContent = '✅ Sent successfully! Thank you my love ❤️';
+        statusEl.className = 'text-xs text-green-400 text-center mt-3';
+        form.reset();
+        
+        // Trigger a sweet burst of heart confetti on success!
+        if (typeof confetti !== 'undefined') {
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#c41e5a', '#ff69b4', '#ff1493', '#ffd700']
+          });
+        }
+      } else {
+        statusEl.textContent = data.message || 'Failed to send. Try again.';
+        statusEl.className = 'text-xs text-red-400 text-center mt-3';
+      }
+    } catch (err) {
+      statusEl.textContent = 'Connection error. Check SMTP settings.';
+      statusEl.className = 'text-xs text-red-400 text-center mt-3';
+    }
+    setTimeout(() => statusEl.classList.add('hidden'), 5000);
+  });
 }

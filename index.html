@@ -380,6 +380,28 @@
         <span style="animation: heartbeat 1s 0.8s ease-in-out infinite;">🌺</span>
       </div>
     </div>
+  <!-- ===== SECTION: REPLY TO HIM ===== -->
+  <section id="reply-section" class="section" data-section="reply" aria-label="Reply Section">
+    <div data-aos="fade-up" class="w-full max-w-lg mx-auto px-6 py-8 rounded-3xl text-center relative z-10" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);">
+      <div style="font-size: 3rem; margin-bottom: 15px; animation: heartbeat 2s infinite;">💌</div>
+      <h2 class="section-title" style="font-size: clamp(1.4rem, 4vw, 1.8rem); margin-bottom: 10px; font-family: var(--font-elegant); font-weight: 600; text-transform: none; letter-spacing: 2px;">Write a Message to Me</h2>
+      <p class="section-subtitle" style="font-size: 0.85rem; margin-bottom: 25px; opacity: 0.7; font-family: var(--font-primary); font-style: italic;">Send your sweet thoughts directly to my email inbox</p>
+      
+      <form id="reply-form" class="space-y-4 text-left">
+        <div>
+          <label class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1" style="font-family: var(--font-primary);">Your Name</label>
+          <input type="text" id="reply-name" value="Abinaya" required class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 transition text-white" style="font-family: var(--font-primary);">
+        </div>
+        <div>
+          <label class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1" style="font-family: var(--font-primary);">Your Message</label>
+          <textarea id="reply-message" rows="4" required placeholder="Type your sweet reply here..." class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm focus:outline-none focus:border-pink-500 transition text-white" style="font-family: var(--font-primary);"></textarea>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl font-medium tracking-wide hover:opacity-90 active:scale-95 transition text-white text-xs uppercase" style="font-family: var(--font-primary); letter-spacing: 1px;">
+          Send with Love ❤️
+        </button>
+      </form>
+      <div id="reply-status" class="text-xs text-center mt-3 hidden"></div>
+    </div>
   </section>
 
 </main><!-- end #main-content -->

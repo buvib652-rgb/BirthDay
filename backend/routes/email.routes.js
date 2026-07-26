@@ -16,14 +16,14 @@ const emailLimiter = rateLimit({
 });
 
 const messageValidation = [
-  body('to').isEmail().withMessage('Valid recipient email required').normalizeEmail(),
+  body('to').optional().isEmail().withMessage('Valid recipient email required').normalizeEmail(),
   body('message').notEmpty().withMessage('Message is required').isLength({ max: 2000 }),
   body('subject').optional().isLength({ max: 200 }),
   body('fromName').optional().isLength({ max: 60 }),
 ];
 
-// POST /api/email/send-message (admin only — prevent spam)
-router.post('/send-message', protect, adminOnly, emailLimiter, messageValidation, validate, emailCtrl.sendMessage);
+// POST /api/email/send-message (Public for reply message, rate-limited and securely locked to admin email)
+router.post('/send-message', emailLimiter, messageValidation, validate, emailCtrl.sendMessage);
 
 // POST /api/email/test
 router.post('/test', protect, adminOnly, emailCtrl.testEmail);

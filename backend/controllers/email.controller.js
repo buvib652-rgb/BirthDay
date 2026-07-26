@@ -15,18 +15,19 @@ const logger          = require('../utils/logger');
 exports.sendMessage = async (req, res, next) => {
   try {
     const { to, subject, message, fromName } = req.body;
+    const recipient = to || process.env.SMTP_USER;
 
-    if (!to || !message) {
-      return error(res, 'Recipient email and message are required.', 400);
+    if (!recipient || !message) {
+      return error(res, 'Recipient email or message content is missing.', 400);
     }
 
     await sendEmail({
-      to,
+      to: recipient,
       subject: subject || '💌 A Special Message For You',
       html: buildEmailTemplate(fromName || 'Someone Special', message),
     });
 
-    logger.info(`Thank-you email sent to ${to}`);
+    logger.info(`Message email sent to ${recipient}`);
     return success(res, {}, 'Message sent successfully ❤️');
   } catch (err) {
     next(err);
