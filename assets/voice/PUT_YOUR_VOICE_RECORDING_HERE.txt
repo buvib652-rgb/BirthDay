@@ -1,0 +1,14 @@
+Place your voice recording here.
+
+File name: happybirthday.mp3
+
+This is the voice message that plays automatically at exactly midnight!
+
+How to record:
+1. Use your phone's Voice Recorder app
+2. Record yourself saying "Happy Birthday!" with a personal message
+3. Export as MP3 and rename to: happybirthday.mp3
+4. Place it in this folder
+
+Tip: Make it heartfelt! This is the most emotional moment of the surprise.
+Example script: "Happy Birthday my love! You are the most amazing person I know and I am so lucky to love you. May this year bring you everything you deserve. I love you so much! ❤️"

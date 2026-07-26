@@ -1,0 +1,21 @@
+# Backend Logs
+logs/
+*.log
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Uploads (local temp files)
+uploads/*
+!uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp

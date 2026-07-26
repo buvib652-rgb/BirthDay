@@ -1,0 +1,9 @@
+# Root ignore
+node_modules/
+backend/node_modules/
+backend/.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/logs/*
+.DS_Store
+Thumbs.db
