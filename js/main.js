@@ -896,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 // BACKEND API INTEGRATION
 // ============================================
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://birthday-swue.onrender.com';
 let API_ONLINE = false;
 
 async function checkBackendStatus() {
