@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { sendReplyEmail } from '../../services/api';
 
 export default function ReplySection() {
-  const [name, setName] = useState('Abinaya');
+  const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState({ text: '', isError: false });
   const [submitting, setSubmitting] = useState(false);

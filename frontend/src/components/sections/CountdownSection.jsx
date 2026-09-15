@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function CountdownSection({ onMidnight }) {
   const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
-  const [isDone, setIsDone] = useState(false);
+  const [isDone, setIsDone]     = useState(false);
+  // Stable ref so onMidnight never causes the interval to restart
+  const onMidnightRef = useRef(onMidnight);
+  useEffect(() => { onMidnightRef.current = onMidnight; }, [onMidnight]);
 
   useEffect(() => {
+    let firedMidnight = false;
+
     const updateCountdown = () => {
-      const now = new Date();
+      const now    = new Date();
       const target = new Date();
       target.setHours(24, 0, 0, 0);
 
@@ -15,16 +20,20 @@ export default function CountdownSection({ onMidnight }) {
       if (diff <= 0) {
         setTimeLeft({ hours: '00', minutes: '00', seconds: '00' });
         setIsDone(true);
-        if (onMidnight) onMidnight();
+        if (!firedMidnight) {
+          firedMidnight = true;
+          if (onMidnightRef.current) onMidnightRef.current();
+        }
+        clearInterval(timer);
         return;
       }
 
-      const hrs = Math.floor(diff / (1000 * 60 * 60));
+      const hrs  = Math.floor(diff / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
       setTimeLeft({
-        hours: String(hrs).padStart(2, '0'),
+        hours:   String(hrs).padStart(2, '0'),
         minutes: String(mins).padStart(2, '0'),
         seconds: String(secs).padStart(2, '0'),
       });
@@ -33,7 +42,7 @@ export default function CountdownSection({ onMidnight }) {
     updateCountdown();
     const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
-  }, [onMidnight]);
+  }, []); // ← Empty dep array: interval created once, never restarted
 
   return (
     <section id="countdown-section" className="section" data-section="countdown" aria-label="Birthday Countdown">
