@@ -205,7 +205,7 @@ export default function SurpriseHome() {
               onSelectImage={handleSelectImage}
             />
             <VideoSection />
-            <LoveLetterSection letterText={config.loveLetter} />
+            <LoveLetterSection letterText={config.loveLetter} hername={config.hername} />
             <WhyILoveYouSection reasons={config.loveReasons} />
             <LoveCounterSection startDate={config.loveStartDate} />
             <LoveMeterSection />
