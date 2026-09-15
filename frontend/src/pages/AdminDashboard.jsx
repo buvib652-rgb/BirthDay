@@ -7,6 +7,7 @@ import {
   saveLoveLetter,
   fetchGalleryPhotos,
   uploadGalleryPhoto,
+  deleteGalleryPhoto,
   fetchMusicTrack,
   uploadMusicTrack,
   deleteMusicTrack,
@@ -59,6 +60,7 @@ export default function AdminDashboard() {
   const [photoCaption, setPhotoCaption] = useState('');
   const [uploadStatus, setUploadStatus] = useState('');
   const [photos, setPhotos] = useState([]);
+  const [deletingPhotoId, setDeletingPhotoId] = useState(null);
 
   // Background Music form state
   const [musicFile, setMusicFile] = useState(null);
@@ -174,6 +176,33 @@ export default function AdminDashboard() {
       }
     } catch {
       setUploadStatus('Upload failed');
+    }
+  };
+
+  const handleDeletePhoto = async (photo) => {
+    const photoId = photo._id || photo.id;
+    if (!photoId) {
+      alert('Invalid photo ID');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this photo?')) {
+      return;
+    }
+
+    setDeletingPhotoId(photoId);
+    try {
+      const data = await deleteGalleryPhoto(photoId, token);
+      if (data && data.success) {
+        setPhotos((prev) => prev.filter((p) => (p._id || p.id) !== photoId));
+      } else {
+        alert(data?.message || 'Delete failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Photo delete error:', err);
+      alert('Delete failed. Please check your connection.');
+    } finally {
+      setDeletingPhotoId(null);
     }
   };
 
@@ -453,11 +482,39 @@ export default function AdminDashboard() {
         <div className="mt-8 border-t border-white/10 pt-8">
           <h2 className="text-xl font-semibold mb-4 text-blue-400"><i className="fas fa-images mr-2"></i>Uploaded Photos ({photos.length})</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {photos.map((photo, i) => (
-              <div key={photo._id || i} className="relative rounded-xl overflow-hidden glass aspect-square border border-white/10">
-                <img src={getFullImageUrl(photo.imageUrl || photo.url || photo.src)} alt={photo.caption || 'Uploaded'} crossOrigin="anonymous" decoding="async" className="w-full h-full object-cover" />
-              </div>
-            ))}
+            {photos.map((photo, i) => {
+              const pId = photo._id || photo.id || i;
+              const isDeleting = deletingPhotoId === pId;
+              return (
+                <div key={pId} className="rounded-xl overflow-hidden glass border border-white/10 flex flex-col justify-between">
+                  <div className="relative aspect-square overflow-hidden bg-black/30">
+                    <img
+                      src={getFullImageUrl(photo.imageUrl || photo.url || photo.src)}
+                      alt={photo.caption || 'Uploaded'}
+                      crossOrigin="anonymous"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-2 flex flex-col gap-1.5 bg-black/40 border-t border-white/5">
+                    {photo.caption && (
+                      <p className="text-xs text-gray-300 truncate text-center" title={photo.caption}>
+                        {photo.caption}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={() => handleDeletePhoto(photo)}
+                      className="w-full py-1.5 px-3 border border-red-500/40 text-red-400 hover:bg-red-500/20 active:bg-red-500/30 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span>🗑</span>
+                      <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -70,6 +70,20 @@ export async function uploadGalleryPhoto(formData, token) {
 }
 
 /**
+ * Delete photo from Admin Dashboard
+ */
+export async function deleteGalleryPhoto(id, token) {
+  const res = await fetch(`${API_BASE_URL}/gallery/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return await res.json();
+}
+
+
+/**
  * Save Website Configurations from Admin Dashboard
  */
 export async function saveSettings(settings, token) {
