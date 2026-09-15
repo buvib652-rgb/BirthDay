@@ -31,6 +31,7 @@ const timelineSchema = new mongoose.Schema(
     date:        { type: String, default: '' }, // Display date string
     imageUrl:    { type: String, default: '' },
     publicId:    { type: String, default: '' },
+    imageDeleted:{ type: Boolean, default: false },
     order:       { type: Number, default: 0 },
   },
   { timestamps: true }

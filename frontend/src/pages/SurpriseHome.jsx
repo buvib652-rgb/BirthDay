@@ -28,7 +28,7 @@ import EndingSection        from '../components/sections/EndingSection';
 import ReplySection         from '../components/sections/ReplySection';
 
 import { defaultConfig } from '../config/defaultConfig';
-import { fetchSettings, fetchGalleryPhotos, fetchMusicTrack, getFullImageUrl, fetchLoveLetter } from '../services/api';
+import { fetchSettings, fetchGalleryPhotos, fetchMusicTrack, getFullImageUrl, fetchLoveLetter, fetchTimelineEvents } from '../services/api';
 
 // ── Memoised static/infrastructure components ────────────────────────────────
 // These have no state-driven re-render requirements — wrap once so they never
@@ -90,6 +90,34 @@ export default function SurpriseHome() {
       .then((data) => {
         if (data?.success && data?.letter?.message) {
           setConfig((prev) => ({ ...prev, loveLetter: data.letter.message }));
+        }
+      })
+      .catch(() => {});
+
+    fetchTimelineEvents()
+      .then((dbEvents) => {
+        if (Array.isArray(dbEvents) && dbEvents.length > 0) {
+          setConfig((prev) => {
+            const mergedEvents = (prev.timelineEvents || defaultConfig.timelineEvents).map((defaultEv) => {
+              const matchedDb = dbEvents.find(
+                (d) => d.title?.toLowerCase().trim() === defaultEv.title?.toLowerCase().trim()
+              );
+              if (!matchedDb) return defaultEv;
+              return {
+                ...defaultEv,
+                _id: matchedDb._id,
+                title: matchedDb.title || defaultEv.title,
+                desc: (matchedDb.description || matchedDb.desc) ? (matchedDb.description || matchedDb.desc) : defaultEv.desc,
+                date: matchedDb.date || defaultEv.date,
+                imageUrl: (matchedDb.imageUrl && matchedDb.imageUrl !== 'null' && matchedDb.imageUrl !== 'undefined' && String(matchedDb.imageUrl).trim() !== '')
+                  ? matchedDb.imageUrl
+                  : (defaultEv.imageUrl || ''),
+                imageDeleted: matchedDb.imageDeleted === true,
+                emoji: matchedDb.emoji || defaultEv.emoji,
+              };
+            });
+            return { ...prev, timelineEvents: mergedEvents };
+          });
         }
       })
       .catch(() => {});

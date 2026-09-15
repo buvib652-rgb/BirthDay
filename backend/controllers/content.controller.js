@@ -69,12 +69,16 @@ exports.getTimeline = async (req, res, next) => {
 
 exports.createTimelineEvent = async (req, res, next) => {
   try {
-    const { emoji, title, description, date, order } = req.body;
-    const eventData = { emoji, title, description, date, order };
+    const { emoji, title, description, date, order, imageDeleted } = req.body;
+    const eventData = {
+      emoji, title, description, date, order,
+      imageDeleted: imageDeleted === 'true' || imageDeleted === true,
+    };
 
     if (req.file) {
       eventData.imageUrl = req.file.path;
       eventData.publicId = req.file.filename;
+      eventData.imageDeleted = false;
     }
 
     const event = await Timeline.create(eventData);
@@ -84,15 +88,28 @@ exports.createTimelineEvent = async (req, res, next) => {
 
 exports.updateTimelineEvent = async (req, res, next) => {
   try {
-    const { emoji, title, description, date, order } = req.body;
-    const updateData = { emoji, title, description, date, order };
+    const { emoji, title, description, date, order, clearImage, imageDeleted } = req.body;
+    const updateData = {};
+    if (emoji !== undefined) updateData.emoji = emoji;
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (date !== undefined) updateData.date = date;
+    if (order !== undefined) updateData.order = order;
+    if (imageDeleted !== undefined) updateData.imageDeleted = (imageDeleted === 'true' || imageDeleted === true);
 
-    if (req.file) {
+    if (clearImage === 'true' || clearImage === true || imageDeleted === 'true' || imageDeleted === true) {
+      const old = await Timeline.findById(req.params.id);
+      if (old?.publicId) await deleteFromCloudinary(old.publicId, 'image');
+      updateData.imageUrl = '';
+      updateData.publicId = '';
+      updateData.imageDeleted = true;
+    } else if (req.file) {
       // Delete old image from Cloudinary
       const old = await Timeline.findById(req.params.id);
       if (old?.publicId) await deleteFromCloudinary(old.publicId, 'image');
       updateData.imageUrl = req.file.path;
       updateData.publicId = req.file.filename;
+      updateData.imageDeleted = false;
     }
 
     const event = await Timeline.findByIdAndUpdate(
@@ -114,6 +131,25 @@ exports.deleteTimelineEvent = async (req, res, next) => {
     return success(res, {}, 'Timeline event deleted');
   } catch (err) { next(err); }
 };
+
+exports.deleteTimelineImage = async (req, res, next) => {
+  try {
+    const event = await Timeline.findById(req.params.id);
+    if (!event) return error(res, 'Timeline event not found.', 404);
+
+    if (event.publicId) {
+      await deleteFromCloudinary(event.publicId, 'image');
+    }
+
+    event.imageUrl = '';
+    event.publicId = '';
+    event.imageDeleted = true;
+    await event.save();
+
+    return success(res, { event }, 'Timeline custom photo deleted');
+  } catch (err) { next(err); }
+};
+
 
 // ════════════════════════════════════════════
 //  WEBSITE SETTINGS

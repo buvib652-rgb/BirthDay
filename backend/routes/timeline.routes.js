@@ -21,6 +21,7 @@ router.get('/', contentCtrl.getTimeline);
 
 router.post('/',    protect, adminOnly, handleTimelineImage, eventValidation, validate, contentCtrl.createTimelineEvent);
 router.put('/:id',  protect, adminOnly, handleTimelineImage, eventValidation, validate, contentCtrl.updateTimelineEvent);
+router.delete('/:id/image', protect, adminOnly, contentCtrl.deleteTimelineImage);
 router.delete('/:id', protect, adminOnly, contentCtrl.deleteTimelineEvent);
 
 module.exports = router;

@@ -11,8 +11,24 @@ import {
   fetchMusicTrack,
   uploadMusicTrack,
   deleteMusicTrack,
+  fetchTimelineEvents,
+  createTimelineEvent,
+  updateTimelineEvent,
+  deleteTimelineImage,
   getFullImageUrl,
 } from '../services/api';
+
+const TARGET_MEMORIES = [
+  { key: 'firstTalk', title: 'First Talk', date: 'The very beginning', emoji: 'chat', defaultDesc: 'The message that started it all — I had no idea my life was about to change forever.' },
+  { key: 'firstSmile', title: 'First Smile', date: 'Shortly after', emoji: 'smile', defaultDesc: 'You smiled and I forgot every word I had ever known.' },
+  { key: 'firstCall', title: 'First Call', date: 'Growing closer', emoji: 'call', defaultDesc: 'We talked for hours and I never wanted to hang up.' },
+  { key: 'firstMeet', title: 'First Meet', date: 'A beautiful day', emoji: 'flower', defaultDesc: 'Seeing you in person for the first time — you were even more beautiful.' },
+  { key: 'firstSelfie', title: 'First Selfie', date: 'A precious moment', emoji: 'selfie', defaultDesc: 'That photo still makes me smile every time I look at it.' },
+  { key: 'firstFight', title: 'First Fight', date: 'A tough moment', emoji: 'rain', defaultDesc: 'Even through the storm, we came back stronger. That is when I knew.' },
+  { key: 'firstGift', title: 'First Gift', date: 'A celebration', emoji: 'gift', defaultDesc: 'Watching your eyes light up was the best gift I could have received.' },
+  { key: 'favouriteMemory', title: 'Favourite Memory', date: 'Unforgettable', emoji: 'star', defaultDesc: 'The moment I knew I never wanted to be anywhere else but with you.' },
+];
+
 
 const getStoredToken = () => {
   try {
@@ -68,14 +84,218 @@ export default function AdminDashboard() {
   const [musicStatus, setMusicStatus] = useState('');
   const [currentMusic, setCurrentMusic] = useState(null);
 
+  // Timeline memories form state
+  const [timelineData, setTimelineData] = useState({});
+
   useEffect(() => {
     if (isLoggedIn) {
       loadSettings();
       loadLetter();
       loadPhotos();
       loadMusic();
+      loadTimeline();
     }
   }, [isLoggedIn]);
+
+  const loadTimeline = async () => {
+    try {
+      const events = await fetchTimelineEvents();
+      const initialMap = {};
+      TARGET_MEMORIES.forEach((m, idx) => {
+        const found = Array.isArray(events)
+          ? events.find((e) => e.title?.toLowerCase().trim() === m.title.toLowerCase().trim())
+          : null;
+
+        initialMap[m.title] = {
+          _id: found?._id || null,
+          text: (found?.description || found?.desc) ? (found.description || found.desc) : m.defaultDesc,
+          savedImage: (found?.imageUrl && found.imageUrl !== 'null' && found.imageUrl !== 'undefined') ? found.imageUrl : '',
+          imageDeleted: found?.imageDeleted === true,
+          newFile: null,
+          localPreview: null,
+          status: '',
+          order: found?.order !== undefined ? found.order : idx,
+          emoji: m.emoji,
+          date: m.date,
+        };
+      });
+      setTimelineData(initialMap);
+    } catch {
+      const initialMap = {};
+      TARGET_MEMORIES.forEach((m, idx) => {
+        initialMap[m.title] = {
+          _id: null,
+          text: m.defaultDesc,
+          savedImage: '',
+          imageDeleted: false,
+          newFile: null,
+          localPreview: null,
+          status: '',
+          order: idx,
+          emoji: m.emoji,
+          date: m.date,
+        };
+      });
+      setTimelineData(initialMap);
+    }
+  };
+
+  const handleMemoryTextChange = (title, text) => {
+    setTimelineData((prev) => ({
+      ...prev,
+      [title]: {
+        ...prev[title],
+        text,
+        status: '',
+      },
+    }));
+  };
+
+  const handleMemoryFileChange = (title, file) => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setTimelineData((prev) => ({
+      ...prev,
+      [title]: {
+        ...prev[title],
+        newFile: file,
+        localPreview: previewUrl,
+        status: '',
+      },
+    }));
+  };
+
+  const handleSaveMemory = async (title) => {
+    const mem = timelineData[title];
+    if (!mem) return;
+
+    setTimelineData((prev) => ({
+      ...prev,
+      [title]: { ...prev[title], status: mem.newFile ? 'Uploading photo...' : 'Saving text...' },
+    }));
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', mem.text || '');
+    formData.append('date', mem.date || '');
+    formData.append('emoji', mem.emoji || '');
+    formData.append('order', mem.order !== undefined ? mem.order : 0);
+
+    if (mem.newFile) {
+      formData.append('image', mem.newFile);
+      formData.append('imageDeleted', 'false');
+    }
+
+    try {
+      let data;
+      if (mem._id) {
+        data = await updateTimelineEvent(mem._id, formData, token);
+      } else {
+        data = await createTimelineEvent(formData, token);
+      }
+
+      if (data && data.success && data.event) {
+        setTimelineData((prev) => ({
+          ...prev,
+          [title]: {
+            ...prev[title],
+            _id: data.event._id,
+            savedImage: data.event.imageUrl || prev[title].savedImage,
+            imageDeleted: data.event.imageDeleted === true,
+            newFile: null,
+            localPreview: null,
+            status: 'Saved successfully!',
+          },
+        }));
+      } else {
+        setTimelineData((prev) => ({
+          ...prev,
+          [title]: { ...prev[title], status: data?.message || 'Save failed' },
+        }));
+      }
+    } catch (err) {
+      console.error('Save timeline error:', err);
+      setTimelineData((prev) => ({
+        ...prev,
+        [title]: { ...prev[title], status: 'Save failed' },
+      }));
+    }
+  };
+
+  const handleDeleteMemoryPhoto = async (title) => {
+    const mem = timelineData[title];
+    if (!mem) return;
+
+    if (!window.confirm('Are you sure you want to delete this memory photo?\nThe photo will be permanently removed from the website.')) {
+      return;
+    }
+
+    // If there is an unsaved local preview file selected:
+    if (!mem.savedImage && mem.localPreview) {
+      setTimelineData((prev) => ({
+        ...prev,
+        [title]: {
+          ...prev[title],
+          newFile: null,
+          localPreview: null,
+          status: 'New photo choice cleared',
+        },
+      }));
+      return;
+    }
+
+    setTimelineData((prev) => ({
+      ...prev,
+      [title]: { ...prev[title], status: 'Deleting photo...' },
+    }));
+
+    try {
+      const targetDefault = TARGET_MEMORIES.find(
+        (t) => t.title.toLowerCase().trim() === title.toLowerCase().trim()
+      );
+      const descToPass = mem.text || targetDefault?.defaultDesc || 'Our story memory';
+
+      let data;
+      if (mem._id) {
+        data = await deleteTimelineImage(mem._id, token, { title: title, description: descToPass });
+      } else {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', descToPass);
+        formData.append('date', targetDefault?.date || '');
+        formData.append('emoji', targetDefault?.emoji || '');
+        formData.append('order', targetDefault ? TARGET_MEMORIES.indexOf(targetDefault) : 0);
+        formData.append('imageDeleted', 'true');
+        data = await createTimelineEvent(formData, token);
+      }
+
+      if (data && data.success) {
+        setTimelineData((prev) => ({
+          ...prev,
+          [title]: {
+            ...prev[title],
+            _id: data.event?._id || prev[title]._id,
+            savedImage: '',
+            imageDeleted: true,
+            newFile: null,
+            localPreview: null,
+            status: 'Photo permanently deleted!',
+          },
+        }));
+      } else {
+        setTimelineData((prev) => ({
+          ...prev,
+          [title]: { ...prev[title], status: data?.message || 'Unable to delete photo. Please try again.' },
+        }));
+      }
+    } catch (err) {
+      console.error('Delete timeline photo error:', err);
+      setTimelineData((prev) => ({
+        ...prev,
+        [title]: { ...prev[title], status: 'Unable to delete photo. Please try again.' },
+      }));
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -386,6 +606,125 @@ export default function AdminDashboard() {
               </button>
             </form>
             {settingsStatus && <div className="text-xs text-center mt-2 text-yellow-400">{settingsStatus}</div>}
+          </div>
+
+          {/* Section: Timeline Memories (Our Story) */}
+          <div className="glass p-6 rounded-2xl md:col-span-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+              <div>
+                <h2 className="text-xl font-semibold text-rose-400">
+                  <i className="fas fa-book-open mr-2"></i>Timeline Memories (Our Story)
+                </h2>
+                <p className="text-xs text-gray-400">
+                  Customize the text and photo for each of the 8 core memories. Uploading a photo is optional.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              {TARGET_MEMORIES.map((m) => {
+                const mem = timelineData[m.title] || {
+                  text: m.defaultDesc,
+                  savedImage: '',
+                  imageDeleted: false,
+                  newFile: null,
+                  localPreview: null,
+                  status: '',
+                };
+                const isDeleted = mem.imageDeleted === true && !mem.localPreview;
+                const displayPhoto = mem.localPreview || (mem.savedImage ? getFullImageUrl(mem.savedImage) : null);
+
+                return (
+                  <div key={m.title} className="p-4 rounded-xl bg-black/40 border border-white/10 flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-sm text-pink-300">{m.title}</span>
+                        <span className="text-xs text-gray-400 italic">{m.date}</span>
+                      </div>
+
+                      {/* Photo Preview */}
+                      <div className="relative w-full h-40 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex items-center justify-center mb-3">
+                        {mem.localPreview ? (
+                          <img src={mem.localPreview} alt={m.title} className="w-full h-full object-cover" />
+                        ) : isDeleted ? (
+                          <div className="text-center p-3 text-red-400/80">
+                            <i className="fas fa-eye-slash text-2xl mb-1 block"></i>
+                            <span className="text-xs font-semibold">Photo Permanently Deleted</span>
+                          </div>
+                        ) : displayPhoto ? (
+                          <img src={displayPhoto} alt={m.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="text-center p-3 text-gray-500">
+                            <i className="fas fa-image text-2xl mb-1 block"></i>
+                            <span className="text-xs">No custom photo (Default active)</span>
+                          </div>
+                        )}
+                        {mem.localPreview && (
+                          <span className="absolute top-2 right-2 bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold shadow">
+                            New Preview
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Choose Photo Input & Delete Button */}
+                      <div className="mb-3 space-y-2">
+                        <label className="block text-xs text-gray-400">Choose New Photo (Optional)</label>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleMemoryFileChange(m.title, e.target.files[0])}
+                            className="w-full text-xs text-gray-300 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 transition"
+                          />
+                          {!isDeleted ? (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMemoryPhoto(m.title)}
+                              className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 rounded-lg text-xs transition whitespace-nowrap"
+                            >
+                              <i className="fas fa-trash-alt mr-1"></i>Delete Photo
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled
+                              className="px-3 py-1 bg-gray-800 border border-white/5 text-gray-500 rounded-lg text-xs cursor-not-allowed whitespace-nowrap"
+                            >
+                              Photo Deleted
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Memory Text */}
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Memory Text</label>
+                        <textarea
+                          rows={3}
+                          value={mem.text}
+                          onChange={(e) => handleMemoryTextChange(m.title, e.target.value)}
+                          className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-pink-500 text-white"
+                          placeholder={`Enter custom text for ${m.title}...`}
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex justify-between items-center border-t border-white/10">
+                      <span className="text-xs text-pink-400 min-h-[1rem]">
+                        {mem.status}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveMemory(m.title)}
+                        className="px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl text-xs font-medium transition active:scale-95 text-white"
+                      >
+                        <i className="fas fa-save mr-1"></i>Save {m.title}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Section C: Love Letter Message */}

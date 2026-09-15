@@ -191,3 +191,88 @@ export async function deleteMusicTrack(id, token) {
   });
   return await res.json();
 }
+
+/**
+ * Fetch Timeline Events
+ */
+export async function fetchTimelineEvents() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/timeline`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data && data.success) {
+      return data.events || data.data || [];
+    }
+    return [];
+  } catch (err) {
+    console.warn('API fetchTimelineEvents error:', err);
+    return [];
+  }
+}
+
+/**
+ * Create Timeline Event (FormData with optional image)
+ */
+export async function createTimelineEvent(formData, token) {
+  const res = await fetch(`${API_BASE_URL}/timeline`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  return await res.json();
+}
+
+/**
+ * Update Timeline Event (FormData with optional image)
+ */
+export async function updateTimelineEvent(id, formData, token) {
+  const res = await fetch(`${API_BASE_URL}/timeline/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  return await res.json();
+}
+
+/**
+ * Delete Timeline Custom Image (Clears custom image from timeline event)
+ */
+export async function deleteTimelineImage(id, token, extraData = {}) {
+  const title = extraData.title || 'Memory';
+  const description = extraData.description && extraData.description.trim() !== '' 
+    ? extraData.description 
+    : 'Our story memory';
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/timeline/${id}/image`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {}
+
+  // Fallback via PUT clearImage with non-empty title and description for validation
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('clearImage', 'true');
+  formData.append('imageDeleted', 'true');
+
+  const res = await fetch(`${API_BASE_URL}/timeline/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return await res.json();
+}
+
+
+
