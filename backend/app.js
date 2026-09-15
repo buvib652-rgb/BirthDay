@@ -57,7 +57,15 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g., Postman, mobile apps)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) return callback(null, true);
+      if (
+        allowedOrigins.includes('*') ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.onrender.com') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
+        return callback(null, true);
+      }
       callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
