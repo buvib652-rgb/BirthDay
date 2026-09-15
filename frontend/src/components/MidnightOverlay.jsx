@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
+import CakeIcon from './icons/CakeIcon';
+import HeartIcon from './icons/HeartIcon';
+import SparkleIcon from './icons/SparkleIcon';
 
 export default function MidnightOverlay({ isOpen, onClose, name = 'MY LOVE' }) {
   const [stars, setStars] = useState([]);
@@ -72,12 +75,15 @@ export default function MidnightOverlay({ isOpen, onClose, name = 'MY LOVE' }) {
       </div>
 
       <div className="midnight-text" id="midnight-title">
-        🎂 HAPPY BIRTHDAY {name.toUpperCase()} ❤️
+        <CakeIcon size="1.2em" style={{ marginRight: '8px' }} /> HAPPY BIRTHDAY {name.toUpperCase()} <HeartIcon size="1.2em" style={{ marginLeft: '8px' }} />
       </div>
-      <div className="midnight-sub">✨ THIS MAGICAL DAY IS ALL YOURS ✨</div>
+      <div className="midnight-sub">
+        <SparkleIcon size="1em" /> THIS MAGICAL DAY IS ALL YOURS <SparkleIcon size="1em" />
+      </div>
       <button className="midnight-close-btn" id="midnight-close-btn" onClick={onClose}>
-        Continue to Your Surprise 💝
+        Continue to Your Surprise <HeartIcon size="1.1em" style={{ marginLeft: '6px' }} />
       </button>
     </div>
   );
 }
+

@@ -117,7 +117,7 @@ export default function AdminDashboard() {
     setSettingsStatus('Saving...');
     try {
       const data = await saveSettings({ hername, birthdayDate, loveStartDate }, token);
-      setSettingsStatus(data && data.success ? 'Configurations saved! ❤️' : 'Save failed');
+      setSettingsStatus(data && data.success ? 'Configurations saved!' : 'Save failed');
     } catch {
       setSettingsStatus('Save failed');
     }
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     setLetterStatus('Saving letter...');
     try {
       const data = await saveLoveLetter(letterTitle, letterMessage, token);
-      setLetterStatus(data && data.success ? 'Love letter saved! 💌' : 'Save failed');
+      setLetterStatus(data && data.success ? 'Love letter saved!' : 'Save failed');
     } catch {
       setLetterStatus('Save failed');
     }
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
     try {
       const data = await uploadGalleryPhoto(formData, token);
       if (data && data.success) {
-        setUploadStatus('Photo uploaded! 📸');
+        setUploadStatus('Photo uploaded!');
         setPhotoFile(null);
         setPhotoCaption('');
         loadPhotos();
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
     try {
       const data = await uploadMusicTrack(formData, token);
       if (data && data.success) {
-        setMusicStatus('Background song saved! 🎵');
+        setMusicStatus('Background song saved!');
         setMusicFile(null);
         loadMusic();
       } else {
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
     try {
       const data = await deleteMusicTrack(currentMusic._id, token);
       if (data && data.success) {
-        setMusicStatus('Song deleted. Default track restored 🎵');
+        setMusicStatus('Song deleted. Default track restored');
         setCurrentMusic(null);
       } else {
         setMusicStatus(data?.message || 'Delete failed');
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
     return (
       <div className="p-4 md:p-8 min-h-screen bg-gradient-to-b from-[#1a0020] via-[#0a0010] to-black text-white">
         <div id="login-container" className="max-w-md mx-auto mt-20 p-8 rounded-3xl glass text-center">
-          <div className="text-4xl mb-4">🔐</div>
+          <div className="text-4xl mb-4 text-pink-500"><i className="fas fa-lock"></i></div>
           <h1 className="text-2xl font-bold mb-6 text-pink-500">Admin Login</h1>
           <p className="text-sm text-gray-400 mb-6">Manage your romantic birthday website content</p>
 
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs text-gray-400 mb-1">Photo Caption (Optional)</label>
                 <input
                   type="text"
-                  placeholder="Us at the beach ❤️"
+                  placeholder="Us at the beach"
                   value={photoCaption}
                   onChange={(e) => setPhotoCaption(e.target.value)}
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-pink-500 text-white"
@@ -443,7 +443,7 @@ export default function AdminDashboard() {
                   <label className="block text-xs text-gray-400 mb-1">Song Title</label>
                   <input
                     type="text"
-                    placeholder="Our Song ♡"
+                    placeholder="Our Song"
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-pink-500 text-white"
@@ -454,7 +454,7 @@ export default function AdminDashboard() {
                 type="submit"
                 className="py-2.5 px-6 bg-pink-600 rounded-xl text-sm font-semibold hover:bg-pink-700 transition text-white"
               >
-                Upload Song 🎵
+                Upload Song
               </button>
             </form>
             {musicStatus && <div className="text-xs text-center mt-2 text-pink-400">{musicStatus}</div>}
@@ -463,7 +463,7 @@ export default function AdminDashboard() {
             {currentMusic && (
               <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-semibold text-pink-400">🎶 Active Song: {currentMusic.title || 'Our Song'}</div>
+                  <div className="text-sm font-semibold text-pink-400"><i className="fas fa-music mr-1"></i> Active Song: {currentMusic.title || 'Our Song'}</div>
                   <audio controls crossOrigin="anonymous" src={getFullImageUrl(currentMusic.musicUrl)} className="mt-2 h-8 w-full max-w-md" />
                 </div>
                 <button
@@ -508,7 +508,7 @@ export default function AdminDashboard() {
                       onClick={() => handleDeletePhoto(photo)}
                       className="w-full py-1.5 px-3 border border-red-500/40 text-red-400 hover:bg-red-500/20 active:bg-red-500/30 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>🗑</span>
+                      <i className="fas fa-trash-alt"></i>
                       <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
                     </button>
                   </div>

@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import HeartIcon from '../icons/HeartIcon';
+import SparkleIcon from '../icons/SparkleIcon';
+import DynamicIcon from '../icons/DynamicIcon';
 
 export default function WhyILoveYouSection({ reasons = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,7 +37,7 @@ export default function WhyILoveYouSection({ reasons = [] }) {
     <section id="why-i-love-you" className="section" data-section="reasons" aria-label="Reasons I Love You">
       <h2 className="section-title" data-aos="fade-up">Why I Love You</h2>
       <div className="section-divider" data-aos="fade-up" data-aos-delay="100"></div>
-      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Click to reveal each reason ✨</p>
+      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Click to reveal each reason <SparkleIcon size="1em" /></p>
 
       <div className="love-reasons-container" data-aos="zoom-in" data-aos-delay="200">
         <div className="love-reason-counter">
@@ -62,9 +65,9 @@ export default function WhyILoveYouSection({ reasons = [] }) {
             onKeyDown={(e) => e.key === 'Enter' && nextCard()}
           >
             <div className="love-reason-number">#{currentIndex + 1}</div>
-            <div className="love-reason-icon">{currentReason.icon}</div>
+            <div className="love-reason-icon"><DynamicIcon name={currentReason.icon} size="2.5rem" /></div>
             <div className="love-reason-text">{currentReason.text}</div>
-            <div className="love-reason-tap-badge">Tap card for next ✨</div>
+            <div className="love-reason-tap-badge">Tap card for next <SparkleIcon size="0.9em" /></div>
           </div>
         </div>
 
@@ -93,8 +96,9 @@ export default function WhyILoveYouSection({ reasons = [] }) {
           <button className="love-reason-nav-btn" onClick={nextCard} aria-label="Next reason">❯</button>
         </div>
 
-        <p className="love-reason-hint">tap the card to see the next reason ❤️</p>
+        <p className="love-reason-hint">tap the card to see the next reason <HeartIcon size="1em" /></p>
       </div>
     </section>
   );
 }
+

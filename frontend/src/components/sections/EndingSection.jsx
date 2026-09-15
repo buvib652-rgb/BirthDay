@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import HeartIcon from '../icons/HeartIcon';
+import LoveHeartsIcon from '../icons/LoveHeartsIcon';
+import RoseIcon from '../icons/RoseIcon';
+import SparkleIcon from '../icons/SparkleIcon';
+import DynamicIcon from '../icons/DynamicIcon';
 
 export default function EndingSection({ name = 'My Love' }) {
   const [stars, setStars] = useState([]);
@@ -17,7 +22,7 @@ export default function EndingSection({ name = 'My Love' }) {
     setStars(newStars);
 
     // Generate floating hearts
-    const heartEmojis = ['❤️', '💕', '💖', '💗', '💝', '🌹', '💫', '✨'];
+    const heartEmojis = ['heart', 'hearts', 'rose', 'sparkle'];
     const newHearts = Array.from({ length: 15 }, (_, i) => ({
       id: i,
       char: heartEmojis[Math.floor(Math.random() * heartEmojis.length)],
@@ -64,28 +69,31 @@ export default function EndingSection({ name = 'My Love' }) {
               ['--drift']: `${h.drift}px`,
             }}
           >
-            {h.char}
+            <DynamicIcon name={h.char} size="1em" />
           </div>
         ))}
       </div>
 
       <div className="ending-content" data-aos="fade-up">
         <div className="section-title" style={{ fontSize: 'clamp(1.2rem, 3vw, 2rem)', letterSpacing: '5px' }}>
-          ✨ The End ✨
+          <SparkleIcon size="1.2em" /> The End <SparkleIcon size="1.2em" />
         </div>
-        <span className="ending-big-heart">❤️</span>
+        <div style={{ margin: '20px 0' }}>
+          <HeartIcon size="5rem" animated />
+        </div>
         <div className="ending-text">
           Happy Birthday, {name}<br />
           <span style={{ fontSize: '70%', opacity: 0.8 }}>May this year bring you all the joy you deserve</span>
         </div>
         <div style={{ marginTop: '40px', display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap', fontSize: '2rem' }}>
-          <span style={{ animation: 'heartbeatInline 1s 0s ease-in-out infinite' }}>🌹</span>
-          <span style={{ animation: 'heartbeatInline 1s 0.2s ease-in-out infinite' }}>💖</span>
-          <span style={{ animation: 'heartbeatInline 1s 0.4s ease-in-out infinite' }}>🌸</span>
-          <span style={{ animation: 'heartbeatInline 1s 0.6s ease-in-out infinite' }}>💕</span>
-          <span style={{ animation: 'heartbeatInline 1s 0.8s ease-in-out infinite' }}>🌺</span>
+          <span style={{ animation: 'heartbeatInline 1s 0s ease-in-out infinite' }}><RoseIcon size="2rem" /></span>
+          <span style={{ animation: 'heartbeatInline 1s 0.2s ease-in-out infinite' }}><LoveHeartsIcon size="2rem" /></span>
+          <span style={{ animation: 'heartbeatInline 1s 0.4s ease-in-out infinite' }}><RoseIcon size="2rem" /></span>
+          <span style={{ animation: 'heartbeatInline 1s 0.6s ease-in-out infinite' }}><LoveHeartsIcon size="2rem" /></span>
+          <span style={{ animation: 'heartbeatInline 1s 0.8s ease-in-out infinite' }}><RoseIcon size="2rem" /></span>
         </div>
       </div>
     </section>
   );
 }
+

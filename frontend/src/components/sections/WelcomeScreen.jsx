@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Typed from 'typed.js';
+import HeartIcon from '../icons/HeartIcon';
+import SparkleIcon from '../icons/SparkleIcon';
+import DynamicIcon from '../icons/DynamicIcon';
 
 export default function WelcomeScreen({ config, onStart }) {
   const typedRef = useRef(null);
@@ -19,7 +22,7 @@ export default function WelcomeScreen({ config, onStart }) {
     setStars(newStars);
 
     // Generate floating hearts
-    const heartEmojis = ['❤️', '💕', '💖', '💗', '💝', '🌹', '💫', '✨'];
+    const heartEmojis = ['heart', 'hearts', 'rose', 'sparkle'];
     const newHearts = Array.from({ length: 20 }, (_, i) => ({
       id: i,
       char: heartEmojis[Math.floor(Math.random() * heartEmojis.length)],
@@ -36,7 +39,7 @@ export default function WelcomeScreen({ config, onStart }) {
       strings: [
         'Someone very special has a birthday today...',
         `That someone is you, ${config.hername || 'My Love'}...`,
-        'This surprise was made just for you 💝',
+        'This surprise was made just for you',
       ],
       typeSpeed: 45,
       backSpeed: 25,
@@ -84,18 +87,18 @@ export default function WelcomeScreen({ config, onStart }) {
               ['--drift']: `${h.drift}px`,
             }}
           >
-            {h.char}
+            <DynamicIcon name={h.char} size="1em" />
           </div>
         ))}
       </div>
 
       <div className="welcome-content">
         <p className="welcome-subtitle" style={{ opacity: 1 }}>
-          ✨ A Special Message For You ✨
+          <SparkleIcon size="1.1em" /> A Special Message For You <SparkleIcon size="1.1em" />
         </p>
         <div className="welcome-typing-container">
           <div className="welcome-typed-text" id="welcome-big-text" style={{ opacity: 1 }}>
-            Happy Birthday {config.hername || 'My Love'}! ❤️
+            Happy Birthday {config.hername || 'My Love'}! <HeartIcon size="1em" />
           </div>
           <span ref={typedRef} id="typed-output"></span>
         </div>
@@ -106,9 +109,10 @@ export default function WelcomeScreen({ config, onStart }) {
           onClick={onStart}
           style={{ opacity: 1, transform: 'translateY(0)', marginTop: '40px' }}
         >
-          💝 Open Your Surprise 💝
+          <HeartIcon size="1.1em" style={{ marginRight: '8px' }} /> Open Your Surprise <HeartIcon size="1.1em" style={{ marginLeft: '8px' }} />
         </button>
       </div>
     </div>
   );
 }
+

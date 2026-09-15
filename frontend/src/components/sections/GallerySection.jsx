@@ -1,16 +1,18 @@
 import React from 'react';
 import { getFullImageUrl } from '../../services/api';
+import DynamicIcon from '../icons/DynamicIcon';
+import SparkleIcon from '../icons/SparkleIcon';
 
 const DEFAULT_GALLERY_PHOTOS = [
-  { src: '', caption: 'Our First Photo 📸' },
-  { src: '', caption: 'A Beautiful Memory ✨' },
-  { src: '', caption: 'Us, Always 💕' },
-  { src: '', caption: 'My Favourite Moment 🌸' },
-  { src: '', caption: 'Adventure Together 🌍' },
-  { src: '', caption: 'Pure Joy 😄' },
-  { src: '', caption: 'Love in Every Frame ❤️' },
-  { src: '', caption: 'Unforgettable 💖' },
-  { src: '', caption: 'Forever & Always 🌹' },
+  { src: '', caption: 'Our First Photo' },
+  { src: '', caption: 'A Beautiful Memory' },
+  { src: '', caption: 'Us, Always' },
+  { src: '', caption: 'My Favourite Moment' },
+  { src: '', caption: 'Adventure Together' },
+  { src: '', caption: 'Pure Joy' },
+  { src: '', caption: 'Love in Every Frame' },
+  { src: '', caption: 'Unforgettable' },
+  { src: '', caption: 'Forever & Always' },
 ];
 
 const PLACEHOLDER_GRADIENTS = [
@@ -25,7 +27,7 @@ const PLACEHOLDER_GRADIENTS = [
   'linear-gradient(135deg, #ffd700, #dc143c)',
 ];
 
-const PLACEHOLDER_ICONS = ['💕', '🌹', '❤️', '💖', '🌸', '✨', '💝', '💫', '🌺'];
+const PLACEHOLDER_ICONS = ['hearts', 'rose', 'heart', 'hearts', 'rose', 'sparkle', 'heart', 'sparkle', 'rose'];
 
 export default function GallerySection({ photos = [], placeholderCount = 9, onSelectImage }) {
   // Merge uploaded database photos with default placeholder cards
@@ -45,7 +47,7 @@ export default function GallerySection({ photos = [], placeholderCount = 9, onSe
     <section id="photo-gallery" className="section" data-section="gallery" aria-label="Photo Gallery">
       <h2 className="section-title" data-aos="fade-up">Our Memories</h2>
       <div className="section-divider" data-aos="fade-up" data-aos-delay="100"></div>
-      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Moments frozen in time, forever in my heart 📸</p>
+      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Moments frozen in time, forever in my heart <SparkleIcon size="1em" /></p>
 
       <div className="gallery-grid" id="gallery-grid" data-aos="fade-up" data-aos-delay="200">
         {galleryItems.map((photo, i) => {
@@ -73,7 +75,7 @@ export default function GallerySection({ photos = [], placeholderCount = 9, onSe
                 </>
               ) : (
                 <div className="gallery-placeholder">
-                  <span style={{ fontSize: '2.5rem' }}>{icon}</span>
+                  <DynamicIcon name={icon} size="2.5rem" />
                   <span>{photo.caption}</span>
                   <span style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '4px', textAlign: 'center' }}>
                     Add photo in Admin Dashboard
@@ -87,3 +89,4 @@ export default function GallerySection({ photos = [], placeholderCount = 9, onSe
     </section>
   );
 }
+

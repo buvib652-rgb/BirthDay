@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import SparkleIcon from '../icons/SparkleIcon';
+import DynamicIcon from '../icons/DynamicIcon';
 
 export default function OurStorySection({ events = [] }) {
   const containerRef = useRef(null);
@@ -14,13 +16,12 @@ export default function OurStorySection({ events = [] }) {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            // Don't unobserve — keep it visible once shown
           }
         });
       },
       {
-        threshold: 0.15,
-        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.05,
+        rootMargin: '0px 0px 50px 0px',
       }
     );
 
@@ -33,7 +34,7 @@ export default function OurStorySection({ events = [] }) {
     <section id="our-story" className="section" data-section="our-story" aria-label="Our Love Story">
       <h2 className="section-title" data-aos="fade-up">Our Love Story</h2>
       <div className="section-divider" data-aos="fade-up" data-aos-delay="100"></div>
-      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Every chapter, written with love ✨</p>
+      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">Every chapter, written with love <SparkleIcon size="1em" /></p>
 
       <div className="timeline-container" id="timeline-container" ref={containerRef}>
         <div className="timeline-line"></div>
@@ -46,7 +47,7 @@ export default function OurStorySection({ events = [] }) {
               <div className="timeline-card-desc">{ev.desc}</div>
             </div>
             <div className="timeline-dot">
-              <span className="timeline-emoji">{ev.emoji}</span>
+              <span className="timeline-emoji"><DynamicIcon name={ev.emoji} size="1.3em" /></span>
             </div>
           </div>
         ))}
@@ -54,3 +55,4 @@ export default function OurStorySection({ events = [] }) {
     </section>
   );
 }
+

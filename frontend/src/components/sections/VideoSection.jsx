@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import SparkleIcon from '../icons/SparkleIcon';
 
 export default function VideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -12,10 +13,10 @@ export default function VideoSection() {
   };
 
   return (
-    <section id="video-section" className="section" data-section="video" aria-label="Video Memory">
+    <section id="video-memory" className="section" data-section="video" aria-label="Video Memory">
       <h2 className="section-title" data-aos="fade-up">Our Video Memory</h2>
       <div className="section-divider" data-aos="fade-up" data-aos-delay="100"></div>
-      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">A moment captured just for us 🎬</p>
+      <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">A moment captured just for us <SparkleIcon size="1em" /></p>
 
       <div className="video-wrapper" data-aos="zoom-in" data-aos-delay="200">
         {!isPlaying ? (

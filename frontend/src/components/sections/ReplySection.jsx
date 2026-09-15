@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { sendReplyEmail } from '../../services/api';
+import HeartIcon from '../icons/HeartIcon';
+import LoveLetterIcon from '../icons/LoveLetterIcon';
 
 export default function ReplySection() {
   const [name, setName] = useState('');
@@ -15,13 +17,13 @@ export default function ReplySection() {
     try {
       const data = await sendReplyEmail(name, message);
       if (data && data.success !== false) {
-        setStatus({ text: 'Message sent with love! ❤️', isError: false });
+        setStatus({ text: 'Message sent with love!', isError: false });
         setMessage('');
       } else {
-        setStatus({ text: 'Message saved! Thank you ❤️', isError: false });
+        setStatus({ text: 'Message saved! Thank you', isError: false });
       }
     } catch {
-      setStatus({ text: 'Message sent! ❤️', isError: false });
+      setStatus({ text: 'Message sent!', isError: false });
     } finally {
       setSubmitting(false);
     }
@@ -33,7 +35,9 @@ export default function ReplySection() {
         data-aos="fade-up"
         className="reply-card glass"
       >
-        <div style={{ fontSize: '3rem', marginBottom: '15px', animation: 'heartbeatInline 2s infinite' }}>💌</div>
+        <div style={{ marginBottom: '15px' }}>
+          <LoveLetterIcon size="3.5rem" />
+        </div>
         <h2 className="section-title" style={{ fontSize: 'clamp(1.4rem, 4vw, 1.8rem)', marginBottom: '10px', fontFamily: 'var(--font-elegant)', fontWeight: 600, textTransform: 'none', letterSpacing: '2px' }}>
           Write a Message to Me
         </h2>
@@ -73,7 +77,7 @@ export default function ReplySection() {
             className="reply-submit-btn"
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            {submitting ? 'Sending...' : 'Send with Love ❤️'}
+            {submitting ? 'Sending...' : <>Send with Love <HeartIcon size="1.1em" style={{ marginLeft: '6px' }} /></>}
           </button>
         </form>
 
@@ -86,3 +90,4 @@ export default function ReplySection() {
     </section>
   );
 }
+

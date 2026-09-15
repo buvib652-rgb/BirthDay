@@ -34,7 +34,7 @@ const MusicPlayer = forwardRef(function MusicPlayer(
   const [duration, setDuration] = useState(0);
 
   const [musicData, setMusicData] = useState({
-    title: musicTitle || 'Our Song ♡',
+    title: musicTitle || 'Our Song',
     url: musicUrl || '',
   });
 
@@ -66,7 +66,7 @@ const MusicPlayer = forwardRef(function MusicPlayer(
   useEffect(() => {
     if (musicUrl && musicUrl !== musicData.url) {
       setMusicData({
-        title: musicTitle || 'Our Song ♡',
+        title: musicTitle || 'Our Song',
         url: musicUrl,
       });
     }
@@ -79,7 +79,7 @@ const MusicPlayer = forwardRef(function MusicPlayer(
       .then((data) => {
         if (data && data.success && data.music && data.music.musicUrl) {
           setMusicData({
-            title: data.music.title || 'Our Song ♡',
+            title: data.music.title || 'Our Song',
             url: getFullImageUrl(data.music.musicUrl),
           });
         }
@@ -182,7 +182,7 @@ const MusicPlayer = forwardRef(function MusicPlayer(
       aria-label="Music Player"
       className={isVisible ? 'visible' : ''}
     >
-      <div className="music-icon">🎵</div>
+      <div className="music-icon"><i className="fas fa-music"></i></div>
       <div className="music-info">
         <div className="music-title" id="music-title">
           {musicData.title}

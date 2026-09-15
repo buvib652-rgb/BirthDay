@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import HeartIcon from '../icons/HeartIcon';
+import SparkleIcon from '../icons/SparkleIcon';
+import DynamicIcon from '../icons/DynamicIcon';
 
 /* ─── tiny inline sparkle component ─── */
 function Sparkle({ style }) {
   return (
     <span className="fq-sparkle" style={style} aria-hidden="true">
-      ✨
+      <SparkleIcon size="1em" />
     </span>
   );
 }
@@ -43,7 +46,7 @@ export default function FinalQuestionSection() {
 
   /* ── generate floating heart objects ── */
   const makeHearts = useCallback(() => {
-    const emojis = ['❤️','💕','💖','💗','💝','💓','🌹'];
+    const emojis = ['heart', 'hearts', 'rose', 'sparkle'];
     return Array.from({ length: 28 }, (_, i) => ({
       id:    i,
       char:  emojis[i % emojis.length],
@@ -119,7 +122,7 @@ export default function FinalQuestionSection() {
                   '--fq-drift':       h.drift,
                 }}
               >
-                {h.char}
+                <DynamicIcon name={h.char} size="1em" />
               </span>
             ))}
           </div>
@@ -161,7 +164,7 @@ export default function FinalQuestionSection() {
               aria-label="Yes, I will stay with you forever"
               onClick={handleYes}
             >
-              YES ❤️
+              YES <HeartIcon size="1.1em" style={{ marginLeft: '6px' }} />
             </button>
             <button
               className="btn-no"
@@ -176,7 +179,7 @@ export default function FinalQuestionSection() {
                 position: noPos.top  ? 'absolute' : 'relative',
               }}
             >
-              Maybe... 😅
+              Maybe...
             </button>
           </div>
         ) : (
@@ -184,11 +187,12 @@ export default function FinalQuestionSection() {
           <div className={`fq-text-block ${phase >= 2 ? 'fq-text-block--show' : ''}`}>
             <div className="fq-line1">I knew it!</div>
             <div className="fq-line2">Together Forever!</div>
-            <div className="fq-line3">❤️</div>
-            <div className="fq-tagline">Always &amp; forever yours ✨</div>
+            <div className="fq-line3"><HeartIcon size="3.5rem" animated /></div>
+            <div className="fq-tagline">Always &amp; forever yours <SparkleIcon size="1em" /></div>
           </div>
         )}
       </div>
     </section>
   );
 }
+

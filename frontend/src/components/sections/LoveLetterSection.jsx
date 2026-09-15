@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import HeartIcon from '../icons/HeartIcon';
+import LoveLetterIcon from '../icons/LoveLetterIcon';
 
 /* ── Pre-compute block scatter data (once at module load) ── */
 const GRID = 5;
@@ -122,7 +124,7 @@ export default function LoveLetterSection({ letterText = '', hername = '' }) {
         <h2 className="section-title" data-aos="fade-up">A Letter From My Heart</h2>
         <div className="section-divider" data-aos="fade-up" data-aos-delay="100"></div>
         <p className="section-subtitle" data-aos="fade-up" data-aos-delay="150">
-          Click the envelope to read your letter 💌
+          Click the envelope to read your letter <LoveLetterIcon size="1.2em" />
         </p>
         <div
           className="envelope-container"
@@ -141,7 +143,7 @@ export default function LoveLetterSection({ letterText = '', hername = '' }) {
             <div className="envelope-flap"></div>
             <div className="envelope-left"></div>
             <div className="envelope-right"></div>
-            <div className="envelope-seal">💝</div>
+            <div className="envelope-seal"><HeartIcon size="1.4em" color="#ff4d6d" /></div>
           </div>
         </div>
         <p className="envelope-hint" id="envelope-hint">~ tap to open ~</p>
@@ -158,7 +160,7 @@ export default function LoveLetterSection({ letterText = '', hername = '' }) {
           {/* PHASE 1: beating heart */}
           {phase === 1 && (
             <div className="hl-scene" aria-hidden="true">
-              <div className="hl-emoji">❤️</div>
+              <div className="hl-emoji"><HeartIcon size="4rem" animated /></div>
               <div className="hl-glow" />
             </div>
           )}
@@ -217,7 +219,7 @@ export default function LoveLetterSection({ letterText = '', hername = '' }) {
                   {!stillTyping && displayedParagraphs.length > 0 && (
                     <div className="lt-closing">
                       <span className="lt-closing-line">Love you a lot,</span>
-                      <span className="lt-signature">{hername || 'Forever Yours ❤️'}</span>
+                      <span className="lt-signature">{hername || 'Forever Yours'} <HeartIcon size="1em" /></span>
                     </div>
                   )}
                 </div>

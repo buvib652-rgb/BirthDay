@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import HeartIcon from './icons/HeartIcon';
 
 export default function Preloader({ onFinish }) {
   const [progress, setProgress] = useState(0);
@@ -31,7 +32,7 @@ export default function Preloader({ onFinish }) {
         <div className="preloader-rings"></div>
         <div className="preloader-rings"></div>
         <div className="preloader-rings"></div>
-        <div className="preloader-heart">❤️</div>
+        <div className="preloader-heart"><HeartIcon size="3.5rem" animated /></div>
       </div>
       <div className="preloader-text">Preparing Something Special...</div>
       <div className="preloader-bar-container">

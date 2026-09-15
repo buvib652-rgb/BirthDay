@@ -81,7 +81,7 @@ export default function SurpriseHome() {
       .then((data) => {
         if (data?.success && data?.music?.musicUrl) {
           setMusicUrl(getFullImageUrl(data.music.musicUrl));
-          setMusicTitle(data.music.title || 'Our Song ♡');
+          setMusicTitle(data.music.title || 'Our Song');
         }
       })
       .catch(() => {});
@@ -100,7 +100,7 @@ export default function SurpriseHome() {
     if (!mainContentVisible) return;
     window.scrollTo({ top: 0, behavior: 'instant' });
     const t = setTimeout(() => {
-      AOS.init({ duration: 900, once: true, easing: 'ease-out-cubic', offset: 40 });
+      AOS.init({ duration: 500, once: true, easing: 'ease-out-cubic', offset: 10 });
       AOS.refresh();
     }, 100);
     return () => clearTimeout(t);

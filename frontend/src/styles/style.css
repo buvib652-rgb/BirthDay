@@ -113,12 +113,7 @@ body:hover .cursor { opacity: 1; }
 #canvas-fireworks,
 #canvas-balloons      { z-index: 3; }
 
-/* --- content-visibility: skip paint for off-screen sections (Chrome/Edge) --- */
-/* Sections that are far off-screen skip layout + paint entirely */
-.section {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 100vh;
-}
+
 
 
 
@@ -1355,6 +1350,11 @@ body:hover .cursor { opacity: 1; }
 }
 
 .love-meter-label.show { opacity: 1; transform: translateY(0); }
+
+/* Staged loading — bar transitions fast to match each step */
+.love-meter-bar {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* ============================================
    SURPRISE GIFT

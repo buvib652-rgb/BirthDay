@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import SparkleIcon from '../icons/SparkleIcon';
 
 export default function CountdownSection({ onMidnight }) {
   const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
@@ -82,7 +83,7 @@ export default function CountdownSection({ onMidnight }) {
 
         {isDone && (
           <div id="countdown-done" style={{ marginTop: '30px' }}>
-            <p className="section-subtitle">🎉 The magical moment has arrived!</p>
+            <p className="section-subtitle"><SparkleIcon size="1.2em" style={{ marginRight: '6px' }} /> The magical moment has arrived!</p>
           </div>
         )}
       </div>
