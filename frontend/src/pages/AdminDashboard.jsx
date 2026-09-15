@@ -1,0 +1,466 @@
+import React, { useEffect, useState } from 'react';
+import {
+  loginAdmin,
+  fetchSettings,
+  saveSettings,
+  fetchLoveLetter,
+  saveLoveLetter,
+  fetchGalleryPhotos,
+  uploadGalleryPhoto,
+  fetchMusicTrack,
+  uploadMusicTrack,
+  deleteMusicTrack,
+  getFullImageUrl,
+} from '../services/api';
+
+const getStoredToken = () => {
+  try {
+    return localStorage.getItem('admin_token') || '';
+  } catch {
+    return window.__admin_token || '';
+  }
+};
+
+const setStoredToken = (val) => {
+  window.__admin_token = val;
+  try {
+    if (val) {
+      localStorage.setItem('admin_token', val);
+    } else {
+      localStorage.removeItem('admin_token');
+    }
+  } catch (err) {
+    console.warn('Storage blocked by browser tracking prevention:', err);
+  }
+};
+
+export default function AdminDashboard() {
+  const [token, setToken] = useState(getStoredToken);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!getStoredToken());
+
+  // Login form state
+  const [email, setEmail] = useState('admin@birthday.com');
+  const [password, setPassword] = useState('Change_This_Password_123');
+  const [loginError, setLoginError] = useState('');
+
+  // Dashboard settings form state
+  const [hername, setHername] = useState('');
+  const [birthdayDate, setBirthdayDate] = useState('');
+  const [loveStartDate, setLoveStartDate] = useState('');
+  const [settingsStatus, setSettingsStatus] = useState('');
+
+  // Love letter form state
+  const [letterTitle, setLetterTitle] = useState('');
+  const [letterMessage, setLetterMessage] = useState('');
+  const [letterStatus, setLetterStatus] = useState('');
+
+  // Photos state
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoCaption, setPhotoCaption] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [photos, setPhotos] = useState([]);
+
+  // Background Music form state
+  const [musicFile, setMusicFile] = useState(null);
+  const [songTitle, setSongTitle] = useState('Our Song');
+  const [musicStatus, setMusicStatus] = useState('');
+  const [currentMusic, setCurrentMusic] = useState(null);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      loadSettings();
+      loadLetter();
+      loadPhotos();
+      loadMusic();
+    }
+  }, [isLoggedIn]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    try {
+      const data = await loginAdmin(email, password);
+      if (data && data.success && data.token) {
+        setToken(data.token);
+        setStoredToken(data.token);
+        setIsLoggedIn(true);
+      } else {
+        setLoginError(data?.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setLoginError('Connection error. Check if backend server is running.');
+    }
+  };
+
+  const handleLogout = () => {
+    setStoredToken('');
+    setToken('');
+    setIsLoggedIn(false);
+  };
+
+  const loadSettings = async () => {
+    try {
+      const data = await fetchSettings();
+      if (data && data.success && data.settings) {
+        setHername(data.settings.hername || '');
+        setBirthdayDate(data.settings.birthdayDate || '');
+        setLoveStartDate(data.settings.loveStartDate || '');
+      }
+    } catch {}
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    setSettingsStatus('Saving...');
+    try {
+      const data = await saveSettings({ hername, birthdayDate, loveStartDate }, token);
+      setSettingsStatus(data && data.success ? 'Configurations saved! ❤️' : 'Save failed');
+    } catch {
+      setSettingsStatus('Save failed');
+    }
+  };
+
+  const loadLetter = async () => {
+    try {
+      const data = await fetchLoveLetter();
+      if (data && data.success && data.letter) {
+        setLetterTitle(data.letter.title || '');
+        setLetterMessage(data.letter.message || '');
+      }
+    } catch {}
+  };
+
+  const handleSaveLetter = async (e) => {
+    e.preventDefault();
+    setLetterStatus('Saving letter...');
+    try {
+      const data = await saveLoveLetter(letterTitle, letterMessage, token);
+      setLetterStatus(data && data.success ? 'Love letter saved! 💌' : 'Save failed');
+    } catch {
+      setLetterStatus('Save failed');
+    }
+  };
+
+  const loadPhotos = async () => {
+    try {
+      const res = await fetchGalleryPhotos();
+      if (Array.isArray(res)) {
+        setPhotos(res);
+      } else if (res && (res.data || res.photos)) {
+        setPhotos(res.data || res.photos || []);
+      }
+    } catch {}
+  };
+
+  const handleUploadPhoto = async (e) => {
+    e.preventDefault();
+    if (!photoFile) return;
+    setUploadStatus('Uploading photo...');
+
+    const formData = new FormData();
+    formData.append('images', photoFile);
+    formData.append('caption', photoCaption);
+
+    try {
+      const data = await uploadGalleryPhoto(formData, token);
+      if (data && data.success) {
+        setUploadStatus('Photo uploaded! 📸');
+        setPhotoFile(null);
+        setPhotoCaption('');
+        loadPhotos();
+      } else {
+        setUploadStatus(data?.message || 'Upload failed');
+      }
+    } catch {
+      setUploadStatus('Upload failed');
+    }
+  };
+
+  const loadMusic = async () => {
+    try {
+      const data = await fetchMusicTrack();
+      if (data && data.success && data.music) {
+        setCurrentMusic(data.music);
+        if (data.music.title) setSongTitle(data.music.title);
+      } else {
+        setCurrentMusic(null);
+      }
+    } catch {}
+  };
+
+  const handleUploadMusic = async (e) => {
+    e.preventDefault();
+    if (!musicFile) {
+      setMusicStatus('Please select an audio file (MP3/WAV)');
+      return;
+    }
+    setMusicStatus('Uploading audio track...');
+
+    const formData = new FormData();
+    formData.append('music', musicFile);
+    formData.append('title', songTitle || 'Our Song');
+
+    try {
+      const data = await uploadMusicTrack(formData, token);
+      if (data && data.success) {
+        setMusicStatus('Background song saved! 🎵');
+        setMusicFile(null);
+        loadMusic();
+      } else {
+        setMusicStatus(data?.message || 'Upload failed');
+      }
+    } catch {
+      setMusicStatus('Upload failed');
+    }
+  };
+
+  const handleDeleteMusic = async () => {
+    if (!currentMusic || !currentMusic._id) return;
+    if (!window.confirm('Delete this background song?')) return;
+    setMusicStatus('Deleting song...');
+    try {
+      const data = await deleteMusicTrack(currentMusic._id, token);
+      if (data && data.success) {
+        setMusicStatus('Song deleted. Default track restored 🎵');
+        setCurrentMusic(null);
+      } else {
+        setMusicStatus(data?.message || 'Delete failed');
+      }
+    } catch {
+      setMusicStatus('Delete failed');
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="p-4 md:p-8 min-h-screen bg-gradient-to-b from-[#1a0020] via-[#0a0010] to-black text-white">
+        <div id="login-container" className="max-w-md mx-auto mt-20 p-8 rounded-3xl glass text-center">
+          <div className="text-4xl mb-4">🔐</div>
+          <h1 className="text-2xl font-bold mb-6 text-pink-500">Admin Login</h1>
+          <p className="text-sm text-gray-400 mb-6">Manage your romantic birthday website content</p>
+
+          <form onSubmit={handleLogin} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 transition text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 transition text-white"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl font-medium tracking-wide hover:opacity-90 active:scale-95 transition text-white"
+            >
+              Login Dashboard
+            </button>
+            {loginError && <p className="text-xs text-red-500 text-center mt-2">{loginError}</p>}
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 md:p-8 min-h-screen bg-gradient-to-b from-[#1a0020] via-[#0a0010] to-black text-white">
+      <div id="dashboard-container" className="max-w-4xl mx-auto rounded-3xl glass p-6 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-center border-b border-white/10 pb-6 mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-yellow-400 bg-clip-text text-transparent">SURPRISE DASHBOARD</h1>
+            <p className="text-sm text-gray-400">Control your website content, music, letters, and photos dynamically</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl text-sm transition"
+          >
+            <i className="fas fa-sign-out-alt mr-2"></i>Logout
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Section A: Photos Upload */}
+          <div className="glass p-6 rounded-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-pink-400"><i className="fas fa-camera mr-2"></i>Upload Photos to Gallery</h2>
+            <p className="text-xs text-gray-400 mb-4">Choose photos to add to the timeline/gallery sections.</p>
+
+            <form onSubmit={handleUploadPhoto} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Select Photo File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPhotoFile(e.target.files[0])}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl p-2 text-sm focus:outline-none text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Photo Caption (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="Us at the beach ❤️"
+                  value={photoCaption}
+                  onChange={(e) => setPhotoCaption(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-pink-500 text-white"
+                />
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-pink-600 rounded-xl text-sm font-semibold hover:bg-pink-700 transition text-white">
+                Upload to Gallery
+              </button>
+            </form>
+            {uploadStatus && <div className="text-xs text-center mt-2 text-pink-400">{uploadStatus}</div>}
+          </div>
+
+          {/* Section B: Website Configuration */}
+          <div className="glass p-6 rounded-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-yellow-400"><i className="fas fa-cog mr-2"></i>Surprise Config</h2>
+            <form onSubmit={handleSaveSettings} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Her Nickname (e.g. Sarah)</label>
+                <input
+                  type="text"
+                  value={hername}
+                  onChange={(e) => setHername(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-yellow-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Birthday Date (YYYY-MM-DD)</label>
+                <input
+                  type="date"
+                  value={birthdayDate}
+                  onChange={(e) => setBirthdayDate(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-yellow-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Love Anniversary / Date (YYYY-MM-DD)</label>
+                <input
+                  type="date"
+                  value={loveStartDate}
+                  onChange={(e) => setLoveStartDate(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-yellow-500 text-white"
+                />
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-yellow-600 rounded-xl text-sm font-semibold hover:bg-yellow-700 transition text-white">
+                Save Configurations
+              </button>
+            </form>
+            {settingsStatus && <div className="text-xs text-center mt-2 text-yellow-400">{settingsStatus}</div>}
+          </div>
+
+          {/* Section C: Love Letter Message */}
+          <div className="glass p-6 rounded-2xl md:col-span-2">
+            <h2 className="text-xl font-semibold mb-4 text-purple-400"><i className="fas fa-heart mr-2"></i>Edit Love Letter</h2>
+            <form onSubmit={handleSaveLetter} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Letter Heading</label>
+                <input
+                  type="text"
+                  placeholder="A Letter From My Heart"
+                  value={letterTitle}
+                  onChange={(e) => setLetterTitle(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Message Content</label>
+                <textarea
+                  rows={6}
+                  value={letterMessage}
+                  onChange={(e) => setLetterMessage(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm focus:outline-none focus:border-purple-500 text-white"
+                  placeholder="Type your beautiful letter here..."
+                ></textarea>
+              </div>
+              <button type="submit" className="py-2.5 px-6 bg-purple-600 rounded-xl text-sm font-semibold hover:bg-purple-700 transition text-white">
+                Save Love Letter
+              </button>
+            </form>
+            {letterStatus && <div className="text-xs text-center mt-2 text-purple-400">{letterStatus}</div>}
+          </div>
+
+          {/* Section D: Background Music / Song Add */}
+          <div className="glass p-6 rounded-2xl md:col-span-2">
+            <h2 className="text-xl font-semibold mb-4 text-pink-400">
+              <i className="fas fa-music mr-2"></i>Add / Update Background Song
+            </h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Upload custom background audio track (MP3/WAV) to play automatically across the website.
+            </p>
+
+            <form onSubmit={handleUploadMusic} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Select Audio File (MP3 / WAV)</label>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => setMusicFile(e.target.files[0])}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl p-2 text-sm focus:outline-none text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Song Title</label>
+                  <input
+                    type="text"
+                    placeholder="Our Song ♡"
+                    value={songTitle}
+                    onChange={(e) => setSongTitle(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-pink-500 text-white"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="py-2.5 px-6 bg-pink-600 rounded-xl text-sm font-semibold hover:bg-pink-700 transition text-white"
+              >
+                Upload Song 🎵
+              </button>
+            </form>
+            {musicStatus && <div className="text-xs text-center mt-2 text-pink-400">{musicStatus}</div>}
+
+            {/* Current Active Background Song Preview */}
+            {currentMusic && (
+              <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-pink-400">🎶 Active Song: {currentMusic.title || 'Our Song'}</div>
+                  <audio controls crossOrigin="anonymous" src={getFullImageUrl(currentMusic.musicUrl)} className="mt-2 h-8 w-full max-w-md" />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDeleteMusic}
+                  className="px-3 py-1.5 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-lg text-xs transition"
+                >
+                  <i className="fas fa-trash-alt mr-1"></i>Delete Track
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Uploaded Photos List */}
+        <div className="mt-8 border-t border-white/10 pt-8">
+          <h2 className="text-xl font-semibold mb-4 text-blue-400"><i className="fas fa-images mr-2"></i>Uploaded Photos ({photos.length})</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {photos.map((photo, i) => (
+              <div key={photo._id || i} className="relative rounded-xl overflow-hidden glass aspect-square border border-white/10">
+                <img src={getFullImageUrl(photo.imageUrl || photo.url || photo.src)} alt={photo.caption || 'Uploaded'} crossOrigin="anonymous" decoding="async" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

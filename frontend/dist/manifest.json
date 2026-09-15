@@ -1,0 +1,14 @@
+{
+  "name": "Happy Birthday My Love ❤️",
+  "short_name": "Birthday Surprise",
+  "description": "A luxury cinematic birthday surprise, crafted with love.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#c41e5a",
+  "icons": [],
+  "screenshots": [],
+  "categories": ["entertainment"],
+  "lang": "en"
+}

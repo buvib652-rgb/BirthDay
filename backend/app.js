@@ -114,15 +114,18 @@ const authLimiter = rateLimit({
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── HEALTH CHECK ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
+const healthHandler = (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Birthday Surprise API is running ❤️',
+    message: 'Backend is running',
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development',
     version: require('./package.json').version,
   });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // ── API ROUTES ────────────────────────────────────────────────────────────────
 app.use('/api/auth',      authLimiter, authRoutes);
